@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS mapData;
+
+CREATE TABLE mapData (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lon TEXT NOT NULL,
+    lat TEXT NOT NULL,
+    damageType TEXT NOT NULL,
+    minorMajor TEXT NOT NULL
+);

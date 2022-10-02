@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',filename='styles/index.css')}}"
+    />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <title>Disaster Damage Alert Integrated System</title>
+  </head>
+  <body>
+    <div>
+      <div class="w3-top" style="width: 100%; margin-left: -30px">
+        <div class="w3-bar w3-white w3-wide w3-padding w3-card">
+          <a href="/landing" class="w3-button"><b>DDAS</b></a>
+          <!-- Float links to the right. Hide them on small screens -->
+          <div class="w3-right w3-hide-small">
+            <a href="/" class="w3-bar-item w3-button">Discover</a>
+            <a href="/map" class="w3-bar-item w3-button">Trace Map</a>
+            <a href="/about" class="w3-bar-item w3-button">About</a>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 50px; margin-bottom: 10px">
+        <p style="font-size: 32px; color: rgb(1, 66, 128); text-align: center">
+          <b>Upload Satellite Image</b>
+        </p>
+      </div>
+      <hr
+        style="
+          width: 100%;
+          /* background-color: #1c91ff;
+          color: #1c91ff; */
+          border: 10px solid #1c91ff;
+          /* border-radius: 5px; */
+          border-width: 5px;
+          margin-top: -10px;
+          margin-bottom: 50px;
+        "
+      />
+      <div style="display: flex">
+        <div class="pic2map">
+          <div class="form">
+            <form
+              id="form"
+              action="/"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <div class="pic">
+                <div
+                  style="
+                    margin-top: -50px;
+                    display: flex;
+                    flex-direction: row;
+                    gap: 10px;
+                  "
+                >
+                  <div><b>I. Choose image:</b><br /></div>
+
+                  <div class="upload-btn-wrapper">
+                    <button class="btn">Upload a file</button>
+
+                    <!-- <input
+                      type="file"
+                      id="image-input"
+                      name="image-input"
+                      accept="image/jpeg, image/jpg, image/png"
+                      style="
+                        display: block;
+                        margin-left: auto;
+                        margin-right: auto;
+                        width: 50%;
+                      "
+                    /> -->
+                    <input
+                      type="file"
+                      id="image-input"
+                      name="image-input"
+                      accept="image/jpeg, image/jpg, image/png"
+                    />
+                    <!-- <br /> -->
+                  </div>
+                </div>
+
+                <br />
+                <img
+                  style="margin-top: -30px"
+                  src="{{url_for ('static',filename='files/image_1.png')}}"
+                  id="inputImage"
+                  alt=""
+                />
+                <p id="pic-info"></p>
+              </div>
+              <b>Input for longitude/latitude:</b> <br />
+              <label for="lat" style="margin-right: 17px">Latitude:</label>
+              <input type="text" id="lat" name="lat" /><br />
+              <label for="lon">Longitude:</label>
+              <input type="text" id="lon" name="lon" /><br />
+              <input
+                type="hidden"
+                id="damageType"
+                name="damageType"
+                value="fire"
+              />
+              <!-- <input
+              type="hidden"
+              id="minorMajor"
+              name="minorMajor"
+              value="Major"
+            /> -->
+              <button id="form-submit" type="submit" form="form">Submit</button>
+            </form>
+          </div>
+        </div>
+        <div class="result">
+          <b style="font-size: 20px">II. Result</b>
+          <h3>1. Damage percentage</h3>
+          <b>Damaged</b>
+          <div class="bar">
+            <div class="damage-inner damage-80" data-percent="20%"></div>
+          </div>
+
+          <b>No Damaged</b>
+          <div class="bar">
+            <div class="damage-inner damage-80" data-percent="70%"></div>
+          </div>
+          <br />
+          <br />
+          <h3 style="margin-bottom: 7px">2. Disaster classification</h3>
+
+          <b>Earthquake</b>
+          <div class="bar">
+            <div class="bar-inner bar-80" data-percent="0%"></div>
+          </div>
+
+          <b>Fire</b>
+          <div class="bar">
+            <div class="bar-inner bar-80" data-percent="30%"></div>
+          </div>
+
+          <b>Flooding</b>
+          <div class="bar">
+            <div class="bar-inner bar-90" data-percent="50%"></div>
+          </div>
+
+          <b>Tsunami</b>
+          <div class="bar">
+            <div class="bar-inner bar-80" data-percent="70%"></div>
+          </div>
+          <b>Volcano</b>
+          <div class="bar">
+            <div class="bar-inner bar-90" data-percent="90%"></div>
+          </div>
+
+          <b>Wind</b>
+          <div class="bar">
+            <div class="bar-inner bar-80" data-percent="100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"
+    ></script>
+    <script>
+      var inputImg = document.getElementById('image-input');
+      var img = document.getElementById('inputImage');
+      var image_input = document.querySelector('#image-input');
+      image_input.addEventListener('change', function () {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          img.src = reader.result;
+          localStorage.setItem('imgData', img);
+        });
+        reader.readAsDataURL(this.files[0]);
+      });
+
+      document.getElementById('inputImage').onclick = function () {
+        EXIF.getData(this, function () {
+          myData = this;
+          console.log(myData.exifdata);
+          // Calculate latitude decimal
+          var latDegree = myData.exifdata.GPSLatitude[0].numerator;
+          var latMinute = myData.exifdata.GPSLatitude[1].numerator;
+          var latSecond = myData.exifdata.GPSLatitude[2].numerator;
+          var latDirection = myData.exifdata.GPSLatitudeRef;
+
+          var latFinal = ConvertDMSToDD(
+            latDegree,
+            latMinute,
+            latSecond,
+            latDirection
+          );
+          console.log(latFinal);
+
+          // Calculate longitude decimal
+          var lonDegree = myData.exifdata.GPSLongitude[0].numerator;
+          var lonMinute = myData.exifdata.GPSLongitude[1].numerator;
+          var lonSecond = myData.exifdata.GPSLongitude[2].numerator;
+          var lonDirection = myData.exifdata.GPSLongitudeRef;
+
+          var lonFinal = ConvertDMSToDD(
+            lonDegree,
+            lonMinute,
+            lonSecond,
+            lonDirection
+          );
+          console.log(lonFinal);
+
+          // Create Google Maps link for the location
+          document.getElementById('pic-info').innerHTML =
+            'This photo was taken at latitude: ' +
+            latFinal +
+            ', longtitude: ' +
+            lonFinal;
+          localStorage.setItem('latData', latFinal);
+          localStorage.setItem('lonData', lonFinal);
+          document.getElementById('lat').value = latFinal;
+          document.getElementById('lon').value = lonFinal;
+        });
+      };
+
+      (function (document) {
+        var damProb = JSON.parse('{{detect}}'.replaceAll('&#39;', '"'));
+        var damType = JSON.parse('{{classify}}'.replaceAll('&#39;', '"'));
+        console.log(damProb);
+        console.log(damType);
+        function getObjKey(obj, value) {
+          return Object.keys(obj).find((key) => obj[key] == value);
+        }
+        let damageness = Object.values(damProb);
+        let type = Object.values(damType);
+        var max = Math.max(...type);
+        document.getElementById('damageType').value = getObjKey(damType, max);
+
+        var _damages = [].slice.call(
+          document.querySelectorAll('.damage-inner')
+        );
+        _damages.map(function (bar, index) {
+          setTimeout(function () {
+            bar.dataset.percent =
+              parseFloat(String(damageness[index] * 100)).toFixed(2) + '%';
+            bar.style.width = bar.dataset.percent;
+            color = Number(bar.dataset.percent.slice(0, -1));
+            if (color > 50) {
+              bar.style.backgroundColor = 'green';
+            } else if (color > 20) {
+              bar.style.backgroundColor = 'orange';
+            } else bar.style.backgroundColor = 'red';
+          }, index * 10);
+        });
+        var _bars = [].slice.call(document.querySelectorAll('.bar-inner'));
+        _bars.map(function (bar, index) {
+          setTimeout(function () {
+            bar.dataset.percent =
+              parseFloat(String(type[index] * 100)).toFixed(2) + '%';
+            bar.style.width = bar.dataset.percent;
+            color = Number(bar.dataset.percent.slice(0, -1));
+            if (color > 50) {
+              bar.style.backgroundColor = 'green';
+            } else if (color > 20) {
+              bar.style.backgroundColor = 'orange';
+            } else bar.style.backgroundColor = 'red';
+          }, index * 10);
+        });
+        // var _mamis = [].slice.call(document.querySelectorAll('.mami-inner'));
+        // _mamis.map(function (bar, index) {
+        //   let minorMajor = Object.values(data.mami);
+        //   setTimeout(function () {
+        //     bar.dataset.percent = String(minorMajor[index] * 100) + '%';
+        //     bar.style.width = bar.dataset.percent;
+        //     color = Number(bar.dataset.percent.slice(0, -1));
+        //     if (color > 75) {
+        //       bar.style.backgroundColor = 'red';
+        //     } else if (color > 40) {
+        //       bar.style.backgroundColor = 'orange';
+        //     } else bar.style.backgroundColor = 'green';
+        //   }, index * 10);
+        // });
+      })(document);
+      function ConvertDMSToDD(degrees, minutes, seconds, direction) {
+        var dd = degrees + minutes / 60 + seconds / 3600;
+
+        if (direction == 'S' || direction == 'W') {
+          dd = dd * -1;
+        }
+
+        return dd;
+      }
+    </script>
+  </body>
+</html>
